@@ -1,0 +1,31 @@
+@import "~bootstrap/scss/bootstrap";
+
+.dashboard-grid {
+  display: grid;
+  height: 100vh;
+  grid-template:
+    "navbar navbar" auto
+    "sidebar main" 1fr /
+    auto 1fr;
+}
+
+.dashboard-main {
+  grid-area: main;
+}
+
+.dashboard-navbar {
+  grid-area: navbar;
+}
+
+.dashboard-sidebar {
+  grid-area: sidebar;
+}
+
+.sidebar-link {
+  border-top-left-radius: 0 !important;
+  border-bottom-left-radius: 0 !important;
+}
+
+.mh {
+  min-height: 10rem;
+}

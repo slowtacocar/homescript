@@ -6,6 +6,7 @@
     "ace-builds": "^1.4.12",
     "bootstrap": "^4.6.0",
     "firebase": "^8.2.8",
+    "lodash": "^4.17.21",
     "node-sass": "^5.0.0",
     "react": "^17.0.1",
     "react-ace": "^9.3.0",

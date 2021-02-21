@@ -22,35 +22,33 @@ function Scripts(props) {
 
   async function newScript() {
     props.openScript(
-      await props.docRef
-        .collection("scripts")
-        .add({
-          name: "New Script",
-          description: "",
-          script: "",
-          trigger: {
-            name: "Schedule",
-            params: {
-              dayOfWeek: [1, 2, 3, 4, 5, 6, 0],
-              hour: 8,
-              minute: 0,
-              second: 0,
-            },
+      await props.docRef.collection("scripts").add({
+        name: "New Script",
+        description: "",
+        script: "",
+        trigger: {
+          name: "Schedule",
+          params: {
+            dayOfWeek: [1, 2, 3, 4, 5, 6, 0],
+            hour: 8,
+            minute: 0,
+            second: 0,
           },
-        })
+        },
+      })
     );
   }
 
   return scripts ? (
     <Row>
-      <Col xs={4}>
+      <Col xs={4} className="mb-4">
         <Button block variant="outline-secondary h-100" onClick={newScript}>
           <p className="display-3">+</p>
           <p className="lead">New Script</p>
         </Button>
       </Col>
       {scripts.map((script) => (
-        <Col xs={4} key={script.id}>
+        <Col xs={4} key={script.id} className="mb-4">
           <Card className="h-100">
             <Card.Body>
               <Card.Title>{script.get("name")}</Card.Title>

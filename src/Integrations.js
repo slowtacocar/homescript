@@ -4,65 +4,61 @@ import Accordion from "react-bootstrap/Accordion";
 import Card from "react-bootstrap/Card";
 import Button from "react-bootstrap/Button";
 import Form from "react-bootstrap/Form";
+import modules from "./modules";
 
 function Integrations(props) {
-  const [data, setData] = React.useState();
-
-  React.useEffect(
-    () =>
-      props.docRef.onSnapshot((doc) => {
-        setData(doc.get("global"));
-      }),
-    [props.docRef]
-  );
-
-  function handleLifxChange(event) {
-    setData({
-      ...data,
-      lifx: { ...data.lifx, [event.target.name]: event.target.value },
+  function handleChange(value, name, key) {
+    props.setData({
+      ...props.data,
+      [key]: { ...props.data[key], [name]: value },
     });
   }
 
-  function submitLifx(event) {
+  function handleSubmit(event, value) {
     event.preventDefault();
-    props.docRef.update({ global: data });
+    props.docRef.set(
+      {
+        global: {
+          [value]: props.data[value],
+        },
+      },
+      { merge: true }
+    );
   }
 
-  return data ? (
+  return props.data ? (
     <Accordion>
-      <Card>
-        <Card.Header>
-          <Accordion.Toggle as={Button} variant="link" eventKey="0">
-            LIFX Integration
-          </Accordion.Toggle>
-        </Card.Header>
-        <Accordion.Collapse eventKey="0">
-          <Card.Body>
-            <Form onSubmit={submitLifx}>
-              <Form.Group controlId="lifxKey">
-                <Form.Label>LIFX API Key</Form.Label>
-                <Form.Control
-                  value={data.lifx.apiKey}
-                  onChange={handleLifxChange}
-                  name="apiKey"
-                />
-                <Form.Text>
-                  Not sure what to do? Click{" "}
-                  <a
-                    href="https://community.lifx.com/t/creating-a-lifx-http-api-token/25"
-                    target="_blank"
-                    rel="noreferrer"
+      {Object.entries(modules).map(([key, value]) => (
+        <Card key={key}>
+          <Card.Header>
+            <Accordion.Toggle as={Button} variant="link" eventKey={key}>
+              {value.name}
+            </Accordion.Toggle>
+          </Card.Header>
+          <Accordion.Collapse eventKey={key}>
+            <Card.Body>
+              <Form onSubmit={(event) => handleSubmit(event, key)}>
+                {value.params.map((param) => (
+                  <Form.Group
+                    controlId={`${key}${param.param}`}
+                    key={param.param}
                   >
-                    here
-                  </a>
-                  .
-                </Form.Text>
-              </Form.Group>
-              <Button type="submit">Save</Button>
-            </Form>
-          </Card.Body>
-        </Accordion.Collapse>
-      </Card>
+                    <Form.Label>{param.name}</Form.Label>
+                    <param.component
+                      value={props.data[key][param.param]}
+                      onChange={(value) =>
+                        handleChange(value, param.param, key)
+                      }
+                    />
+                    <Form.Text>{param.description}</Form.Text>
+                  </Form.Group>
+                ))}
+                <Button type="submit">Save</Button>
+              </Form>
+            </Card.Body>
+          </Accordion.Collapse>
+        </Card>
+      ))}
     </Accordion>
   ) : (
     <div className="text-center">

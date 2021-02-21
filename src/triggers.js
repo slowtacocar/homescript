@@ -36,7 +36,12 @@ const triggers = {
           <FormControl
             type="number"
             {...props}
-            onChange={(event) => props.onChange(event.target.value)}
+            onChange={(event) =>
+              props.onChange(
+                event.target.value === "" ? null : Number(event.target.value)
+              )
+            }
+            value={props.value === null ? "" : props.value}
           />
         ),
       },
@@ -49,7 +54,12 @@ const triggers = {
           <FormControl
             type="number"
             {...props}
-            onChange={(event) => props.onChange(event.target.value)}
+            onChange={(event) =>
+              props.onChange(
+                event.target.value === "" ? null : Number(event.target.value)
+              )
+            }
+            value={props.value === null ? "" : props.value}
           />
         ),
       },
@@ -62,79 +72,24 @@ const triggers = {
           <FormControl
             type="number"
             {...props}
-            onChange={(event) => props.onChange(event.target.value)}
+            onChange={(event) =>
+              props.onChange(
+                event.target.value === "" ? null : Number(event.target.value)
+              )
+            }
+            value={props.value === null ? "" : props.value}
           />
         ),
       },
     ],
   },
   Sunrise: {
-    default: {
-      lat: 0,
-      long: 0,
-    },
-    params: [
-      {
-        param: "lat",
-        name: "Latitude",
-        description: "The latitude of your location",
-        component: (props) => (
-          <FormControl
-            type="number"
-            step="any"
-            {...props}
-            onChange={(event) => props.onChange(event.target.value)}
-          />
-        ),
-      },
-      {
-        param: "long",
-        name: "Longitude",
-        description: "The longitude of your location",
-        component: (props) => (
-          <FormControl
-            type="number"
-            step="any"
-            {...props}
-            onChange={(event) => props.onChange(event.target.value)}
-          />
-        ),
-      },
-    ],
+    default: {},
+    params: [],
   },
   Sunset: {
-    default: {
-      lat: 0,
-      long: 0,
-    },
-    params: [
-      {
-        param: "lat",
-        name: "Latitude",
-        description: "The latitude of your location",
-        component: (props) => (
-          <FormControl
-            type="number"
-            step="any"
-            {...props}
-            onChange={(event) => props.onChange(event.target.value)}
-          />
-        ),
-      },
-      {
-        param: "long",
-        name: "Longitude",
-        description: "The longitude of your location",
-        component: (props) => (
-          <FormControl
-            type="number"
-            step="any"
-            {...props}
-            onChange={(event) => props.onChange(event.target.value)}
-          />
-        ),
-      },
-    ],
+    default: {},
+    params: [],
   },
 };
 

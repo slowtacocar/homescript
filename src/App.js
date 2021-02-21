@@ -11,6 +11,7 @@ import Scripts from "./Scripts";
 import Integrations from "./Integrations";
 import Container from "react-bootstrap/Container";
 import Script from "./Script";
+import { defaults } from "./modules";
 
 function App() {
   const [user, setUser] = React.useState();
@@ -20,6 +21,19 @@ function App() {
     () => user && firebase.firestore().collection("user").doc(user.uid),
     [user]
   );
+  const [data, setData] = React.useState();
+
+  React.useEffect(() => {
+    if (docRef) {
+      return docRef.onSnapshot((doc) => {
+        if (doc.exists) {
+          setData(doc.data());
+        } else {
+          doc.ref.set({ global: defaults });
+        }
+      });
+    }
+  }, [docRef]);
 
   React.useEffect(() => firebase.auth().onAuthStateChanged(setUser), []);
 
@@ -41,6 +55,10 @@ function App() {
 
   function exitScript() {
     setCurrentScript();
+  }
+
+  function setGlobalData(global) {
+    setData({ ...data, global });
   }
 
   return user === null ? (
@@ -68,7 +86,7 @@ function App() {
         </Navbar>
       </div>
       {currentScript ? (
-        <Script docRef={currentScript} exit={exitScript} />
+        <Script docRef={currentScript} exit={exitScript} data={data.global} />
       ) : (
         <>
           <div className="dashboard-sidebar">
@@ -98,7 +116,11 @@ function App() {
               {currentPage === "scripts" ? (
                 <Scripts docRef={docRef} openScript={openScript} />
               ) : currentPage === "integrations" ? (
-                <Integrations docRef={docRef} />
+                <Integrations
+                  docRef={docRef}
+                  data={data.global}
+                  setData={setGlobalData}
+                />
               ) : null}
             </Container>
           </div>

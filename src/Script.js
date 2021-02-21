@@ -10,15 +10,31 @@ import Button from "react-bootstrap/Button";
 import InputGroup from "react-bootstrap/InputGroup";
 import Modal from "react-bootstrap/Modal";
 import triggers from "./triggers";
+import getDevices from "./devices";
+import Accordion from "react-bootstrap/Accordion";
+import Card from "react-bootstrap/Card";
+import ListGroup from "react-bootstrap/ListGroup";
+import functions from "./functions";
 
 function Script(props) {
   const [script, setScript] = React.useState();
   const [shownModal, setShownModal] = React.useState(false);
+  const [devices, setDevices] = React.useState();
+  const [method, setMethod] = React.useState();
 
   React.useEffect(
     () => props.docRef.onSnapshot((doc) => setScript(doc.data())),
     [props.docRef]
   );
+
+  React.useEffect(() => {
+    if (props.data) {
+      async function setGet() {
+        setDevices(await getDevices(props.data));
+      }
+      setGet();
+    }
+  }, [props.data]);
 
   function handleChange(event) {
     setScript({ ...script, [event.target.name]: event.target.value });
@@ -51,12 +67,6 @@ function Script(props) {
     });
   }
 
-  async function handleChangeTriggerParams(event) {
-    event.preventDefault();
-    await props.docRef.update({ trigger: script.trigger });
-    hideModal();
-  }
-
   async function handleSubmit(event) {
     event.preventDefault();
     await props.docRef.update(script);
@@ -76,9 +86,117 @@ function Script(props) {
     setShownModal(false);
   }
 
+  function getInfo(method) {
+    setMethod(method);
+  }
+
+  function hideMethod() {
+    setMethod(null);
+  }
+
   return (
     <>
-      <div className="dashboard-sidebar"></div>
+      <div className="dashboard-sidebar overflow-auto">
+        <div className="p-4 h-100 d-flex justify-content-between flex-column bg-light">
+          <div>
+            <h4 className="mb-3">Devices</h4>
+            {devices ? (
+              <Accordion>
+                {Object.entries(devices).map(([key, device]) => (
+                  <Card key={key}>
+                    <Card.Header>
+                      <code>
+                        <Accordion.Toggle
+                          as={Button}
+                          variant="link"
+                          eventKey={key}
+                        >
+                          {key}
+                        </Accordion.Toggle>
+                      </code>
+                    </Card.Header>
+                    <Accordion.Collapse eventKey={key}>
+                      <ListGroup variant="flush">
+                        {device.map((method) => (
+                          <ListGroup.Item
+                            key={method.name}
+                            action
+                            onClick={() => getInfo(method)}
+                          >
+                            <code>{method.name}</code>
+                          </ListGroup.Item>
+                        ))}
+                      </ListGroup>
+                    </Accordion.Collapse>
+                  </Card>
+                ))}
+              </Accordion>
+            ) : (
+              <div className="text-center">
+                <Spinner animation="border" role="status">
+                  <span className="sr-only">Loading...</span>
+                </Spinner>
+              </div>
+            )}
+          </div>
+          <div>
+            <h4 className="mb-3">Functions</h4>
+            <ListGroup>
+              {functions.map((method) => (
+                <ListGroup.Item
+                  key={method.name}
+                  action
+                  onClick={() => getInfo(method)}
+                >
+                  <code>{method.name}</code>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          </div>
+          <Modal show={!!method} onHide={hideMethod}>
+            {method && (
+              <>
+                <Modal.Header closeButton>
+                  <code>
+                    <Modal.Title>{method.name}</Modal.Title>
+                  </code>
+                </Modal.Header>
+                <Modal.Body>
+                  <p>{method.description}</p>
+                  <ul>
+                    {method.params.map((param) => (
+                      <li key={param.name}>
+                        <code>{param.name}</code>{" "}
+                        <strong>&lt;{param.type}&gt;</strong>{" "}
+                        {param.description}{" "}
+                        {param.default ? (
+                          <>
+                            {" "}
+                            Default: <samp>{param.default}</samp>
+                          </>
+                        ) : (
+                          ""
+                        )}
+                      </li>
+                    ))}
+                    {method.returns && (
+                      <li>
+                        Returns: <strong>&lt;{method.returns.type}&gt;</strong>{" "}
+                        {method.returns.description}
+                      </li>
+                    )}
+                  </ul>
+                </Modal.Body>
+              </>
+            )}
+            <Modal.Footer>
+              <Button variant="secondary" onClick={hideMethod}>
+                Close
+              </Button>
+            </Modal.Footer>
+          </Modal>
+        </div>
+      </div>
       <div className="dashboard-main overflow-auto">
         <div className="p-3 h-100">
           {script ? (
@@ -118,7 +236,13 @@ function Script(props) {
                       ))}
                     </Form.Control>
                     <InputGroup.Append>
-                      <Button variant="outline-secondary" onClick={showModal}>
+                      <Button
+                        variant="outline-secondary"
+                        onClick={showModal}
+                        disabled={
+                          triggers[script.trigger.name].params.length <= 0
+                        }
+                      >
                         Options...
                       </Button>
                     </InputGroup.Append>
@@ -166,28 +290,25 @@ function Script(props) {
                 <Modal.Header closeButton>
                   <Modal.Title>{script.trigger.name}</Modal.Title>
                 </Modal.Header>
-                <Form onSubmit={handleChangeTriggerParams}>
-                  <Modal.Body>
-                    {triggers[script.trigger.name].params.map((param) => (
-                      <Form.Group controlId={param.param} key={param.param}>
-                        <Form.Label>{param.name}</Form.Label>
-                        <param.component
-                          value={script.trigger.params[param.param]}
-                          onChange={(value) =>
-                            handleChangeTriggerParam(value, param.param)
-                          }
-                        />
-                        <Form.Text>{param.description}</Form.Text>
-                      </Form.Group>
-                    ))}
-                  </Modal.Body>
-                  <Modal.Footer>
-                    <Button variant="secondary" onClick={hideModal}>
-                      Close
-                    </Button>
-                    <Button type="submit">Save</Button>
-                  </Modal.Footer>
-                </Form>
+                <Modal.Body>
+                  {triggers[script.trigger.name].params.map((param) => (
+                    <Form.Group controlId={param.param} key={param.param}>
+                      <Form.Label>{param.name}</Form.Label>
+                      <param.component
+                        value={script.trigger.params[param.param]}
+                        onChange={(value) =>
+                          handleChangeTriggerParam(value, param.param)
+                        }
+                      />
+                      <Form.Text>{param.description}</Form.Text>
+                    </Form.Group>
+                  ))}
+                </Modal.Body>
+                <Modal.Footer>
+                  <Button variant="secondary" onClick={hideModal}>
+                    Close
+                  </Button>
+                </Modal.Footer>
               </Modal>
             </>
           ) : (

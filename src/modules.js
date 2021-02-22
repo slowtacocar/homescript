@@ -22,6 +22,7 @@ const modules = {
         ),
         component: (props) => (
           <FormControl
+            type="password"
             {...props}
             onChange={(event) => props.onChange(event.target.value)}
           />

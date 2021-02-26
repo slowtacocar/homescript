@@ -76,11 +76,13 @@ export default async function getDevices(globalUserData) {
 
   const devices = {};
 
-  for (const light of await res.json()) {
-    devices[camelCase(light.label)] = lifx;
-    const group = camelCase(light.group.name);
-    if (!devices[group]) {
-      devices[group] = lifx;
+  if (res.ok) {
+    for (const light of await res.json()) {
+      devices[camelCase(light.label)] = lifx;
+      const group = camelCase(light.group.name);
+      if (!devices[group]) {
+        devices[group] = lifx;
+      }
     }
   }
 

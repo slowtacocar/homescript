@@ -138,6 +138,11 @@ function Script(props) {
                 </Spinner>
               </div>
             )}
+            <p>
+              Don't see what you're looking for?
+              <br />
+              Check the Integrations tab.
+            </p>
           </div>
           <div>
             <h4 className="mb-3">Functions</h4>

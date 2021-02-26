@@ -1,4 +1,4 @@
-import firebase from "./firebase";
+import firebase from "firebase/app";
 import "firebase/auth";
 import "firebase/firestore";
 import React from "react";
@@ -12,6 +12,15 @@ import Integrations from "./Integrations";
 import Container from "react-bootstrap/Container";
 import Script from "./Script";
 import { defaults } from "./modules";
+
+firebase.initializeApp({
+  apiKey: "AIzaSyAAWZtydcyR6uy3JSV3GI8ADRmjAD_CPt0",
+  authDomain: "homescript.firebaseapp.com",
+  projectId: "homescript",
+  storageBucket: "homescript.appspot.com",
+  messagingSenderId: "628563694965",
+  appId: "1:628563694965:web:0738a17c7ee1f850752f3c",
+});
 
 function App() {
   const [user, setUser] = React.useState();
@@ -66,10 +75,7 @@ function App() {
       firebaseAuth={firebase.auth()}
       uiConfig={{
         signInFlow: "popup",
-        signInOptions: [
-          firebase.auth.EmailAuthProvider.PROVIDER_ID,
-          firebase.auth.GoogleAuthProvider.PROVIDER_ID,
-        ],
+        signInOptions: [firebase.auth.EmailAuthProvider.PROVIDER_ID],
         callbacks: {
           signInSuccessWithAuthResult: () => false,
         },

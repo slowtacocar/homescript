@@ -1,97 +1,115 @@
-import React from "react";
-import Form from "react-bootstrap/Form";
-import AceEditor from "react-ace";
-import "ace-builds/src-noconflict/mode-javascript";
-import "ace-builds/src-noconflict/theme-textmate";
-import "ace-builds/src-noconflict/ext-language_tools";
-import "ace-builds/webpack-resolver";
-import Spinner from "react-bootstrap/Spinner";
-import Button from "react-bootstrap/Button";
-import InputGroup from "react-bootstrap/InputGroup";
-import Modal from "react-bootstrap/Modal";
-import triggers from "./triggers";
-import getDevices from "./devices";
-import Accordion from "react-bootstrap/Accordion";
-import Card from "react-bootstrap/Card";
-import ListGroup from "react-bootstrap/ListGroup";
-import functions from "./functions";
+import {
+  Form,
+  Spinner,
+  Button,
+  InputGroup,
+  Modal,
+  Accordion,
+  Card,
+  ListGroup,
+} from "react-bootstrap";
+import triggers from "../../lib/triggers";
+import getDevices from "../../lib/devices";
+import functions from "../../lib/functions";
+import useSWR from "swr";
+import fetcher from "@homescript/lib/fetcher";
+import { useEffect, useState, useRef } from "react";
+import { useRouter } from "next/router";
 
-function Script(props) {
-  const [script, setScript] = React.useState();
-  const [shownModal, setShownModal] = React.useState(false);
-  const [devices, setDevices] = React.useState();
-  const [method, setMethod] = React.useState();
+export default function Script() {
+  const router = useRouter();
 
-  React.useEffect(
-    () => props.docRef.onSnapshot((doc) => setScript(doc.data())),
-    [props.docRef]
-  );
+  const { data } = useSWR(`/api/scripts/${router.query.id}`, fetcher);
+  const { data: globalUserData } = useSWR("/api/user/global", fetcher);
 
-  React.useEffect(() => {
-    if (props.data) {
-      async function setGet() {
-        setDevices(await getDevices(props.data));
+  const [formState, setFormState] = useState(null);
+  const [isOptionsModalShown, setIsOptionsModalShown] = useState(false);
+  const [devices, setDevices] = useState(null);
+  const [methodModalState, setMethodModalState] = useState(null);
+  const [editor, setEditor] = useState(null);
+  const editorContainer = useRef();
+
+  useEffect(() => {
+    if (data) {
+      setFormState({
+        name: data.name,
+        description: data.description,
+        trigger: data.trigger,
+      });
+      if (editor) {
+        editor.setValue(data.script);
       }
-      setGet();
     }
-  }, [props.data]);
+  }, [data, editor]);
+
+  useEffect(() => {
+    if (globalUserData) {
+      getDevices(globalUserData).then((newDevices) => setDevices(newDevices));
+    }
+  }, [globalUserData]);
+
+  useEffect(() => {
+    if (!editor) {
+      import("ace-builds/src-noconflict/ace").then(async (ace) => {
+        await Promise.all([
+          import("ace-builds/src-noconflict/ext-language_tools"),
+          import("ace-builds/src-noconflict/mode-javascript"),
+          import("ace-builds/src-noconflict/theme-textmate"),
+        ]);
+        setEditor(
+          ace.edit(editorContainer.current, {
+            enableLiveAutocompletion: true,
+            mode: "ace/mode/javascript",
+            theme: "ace/theme/textmate",
+          })
+        );
+      });
+    }
+  }, [editor]);
 
   function handleChange(event) {
-    setScript({ ...script, [event.target.name]: event.target.value });
-  }
-
-  function handleChangeScript(value) {
-    setScript({ ...script, script: value });
+    const { name, value } = event.target;
+    setFormState((oldFormState) => ({ ...oldFormState, [name]: value }));
   }
 
   function handleChangeTriggerName(event) {
-    setScript({
-      ...script,
+    const { value } = event.target;
+    setFormState((oldFormState) => ({
+      ...oldFormState,
       trigger: {
-        name: event.target.value,
-        params: triggers[event.target.value].default,
+        name: value,
+        params: triggers[value].default,
       },
-    });
+    }));
   }
 
   function handleChangeTriggerParam(value, key) {
-    setScript({
-      ...script,
+    setFormState((oldFormState) => ({
+      ...oldFormState,
       trigger: {
-        ...script.trigger,
+        ...oldFormState.trigger,
         params: {
-          ...script.trigger.params,
+          ...oldFormState.trigger.params,
           [key]: value,
         },
       },
-    });
+    }));
   }
 
   async function handleSubmit(event) {
     event.preventDefault();
-    await props.docRef.update(script);
-    props.exit();
+    await fetcher(`/api/scripts/${router.query.id}`, {
+      method: "PATCH",
+      body: { ...formState, script: editor.getValue() },
+    });
+    router.push("/");
   }
 
   async function deleteScript() {
-    await props.docRef.delete();
-    props.exit();
-  }
-
-  function showModal() {
-    setShownModal(true);
-  }
-
-  function hideModal() {
-    setShownModal(false);
-  }
-
-  function getInfo(method) {
-    setMethod(method);
-  }
-
-  function hideMethod() {
-    setMethod(null);
+    await fetcher(`/api/scripts/${router.query.id}`, {
+      method: "DELETE",
+    });
+    router.push("/");
   }
 
   return (
@@ -121,7 +139,7 @@ function Script(props) {
                           <ListGroup.Item
                             key={method.name}
                             action
-                            onClick={() => getInfo(method)}
+                            onClick={() => setMethodModalState(method)}
                           >
                             <code>{method.name}</code>
                           </ListGroup.Item>
@@ -139,7 +157,7 @@ function Script(props) {
               </div>
             )}
             <p>
-              Don't see what you're looking for?
+              Don&apos;t see what you&apos;re looking for?
               <br />
               Check the Integrations tab.
             </p>
@@ -151,25 +169,28 @@ function Script(props) {
                 <ListGroup.Item
                   key={method.name}
                   action
-                  onClick={() => getInfo(method)}
+                  onClick={() => setMethodModalState(method)}
                 >
                   <code>{method.name}</code>
                 </ListGroup.Item>
               ))}
             </ListGroup>
           </div>
-          <Modal show={!!method} onHide={hideMethod}>
-            {method && (
+          <Modal
+            show={!!methodModalState}
+            onHide={() => setMethodModalState(null)}
+          >
+            {methodModalState && (
               <>
                 <Modal.Header closeButton>
                   <code>
-                    <Modal.Title>{method.name}</Modal.Title>
+                    <Modal.Title>{methodModalState.name}</Modal.Title>
                   </code>
                 </Modal.Header>
                 <Modal.Body>
-                  <p>{method.description}</p>
+                  <p>{methodModalState.description}</p>
                   <ul>
-                    {method.params.map((param) => (
+                    {methodModalState.params.map((param) => (
                       <li key={param.name}>
                         <code>{param.name}</code>{" "}
                         <strong>&lt;{param.type}&gt;</strong>{" "}
@@ -184,10 +205,11 @@ function Script(props) {
                         )}
                       </li>
                     ))}
-                    {method.returns && (
+                    {methodModalState.returns && (
                       <li>
-                        Returns: <strong>&lt;{method.returns.type}&gt;</strong>{" "}
-                        {method.returns.description}
+                        Returns:{" "}
+                        <strong>&lt;{methodModalState.returns.type}&gt;</strong>{" "}
+                        {methodModalState.returns.description}
                       </li>
                     )}
                   </ul>
@@ -195,7 +217,10 @@ function Script(props) {
               </>
             )}
             <Modal.Footer>
-              <Button variant="secondary" onClick={hideMethod}>
+              <Button
+                variant="secondary"
+                onClick={() => setMethodModalState(null)}
+              >
                 Close
               </Button>
             </Modal.Footer>
@@ -204,7 +229,7 @@ function Script(props) {
       </div>
       <div className="dashboard-main overflow-auto">
         <div className="p-3 h-100">
-          {script ? (
+          {formState ? (
             <>
               <Form
                 onSubmit={handleSubmit}
@@ -213,7 +238,7 @@ function Script(props) {
                 <Form.Group controlId="name">
                   <Form.Label>Name</Form.Label>
                   <Form.Control
-                    value={script.name}
+                    value={formState.name}
                     name="name"
                     onChange={handleChange}
                   />
@@ -221,7 +246,7 @@ function Script(props) {
                 <Form.Group controlId="description">
                   <Form.Label>Description</Form.Label>
                   <Form.Control
-                    value={script.description}
+                    value={formState.description}
                     name="description"
                     onChange={handleChange}
                   />
@@ -231,7 +256,7 @@ function Script(props) {
                   <InputGroup>
                     <Form.Control
                       as="select"
-                      value={script.trigger.name}
+                      value={formState.trigger.name}
                       onChange={handleChangeTriggerName}
                     >
                       {Object.entries(triggers).map(([value]) => (
@@ -243,9 +268,9 @@ function Script(props) {
                     <InputGroup.Append>
                       <Button
                         variant="outline-secondary"
-                        onClick={showModal}
+                        onClick={() => setIsOptionsModalShown(true)}
                         disabled={
-                          triggers[script.trigger.name].params.length <= 0
+                          triggers[formState.trigger.name].params.length <= 0
                         }
                       >
                         Options...
@@ -258,18 +283,10 @@ function Script(props) {
                   className="flex-grow-1 d-flex flex-column mh"
                 >
                   <Form.Label>Script</Form.Label>
-                  <div className="border flex-grow-1">
-                    <AceEditor
-                      width="auto"
-                      height="100%"
-                      enableLiveAutocompletion
-                      mode="javascript"
-                      theme="textmate"
-                      name="script"
-                      onChange={handleChangeScript}
-                      value={script.script}
-                    />
-                  </div>
+                  <div
+                    className="border flex-grow-1"
+                    ref={editorContainer}
+                  ></div>
                 </Form.Group>
                 <div>
                   <Button type="submit" className="mr-2">
@@ -278,7 +295,7 @@ function Script(props) {
                   <Button
                     variant="secondary"
                     className="mr-2"
-                    onClick={props.exit}
+                    onClick={() => router.push("/")}
                   >
                     Close
                   </Button>
@@ -291,16 +308,19 @@ function Script(props) {
                   </Button>
                 </div>
               </Form>
-              <Modal show={shownModal} onHide={hideModal}>
+              <Modal
+                show={isOptionsModalShown}
+                onHide={() => setIsOptionsModalShown(false)}
+              >
                 <Modal.Header closeButton>
-                  <Modal.Title>{script.trigger.name}</Modal.Title>
+                  <Modal.Title>{formState.trigger.name}</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
-                  {triggers[script.trigger.name].params.map((param) => (
+                  {triggers[formState.trigger.name].params.map((param) => (
                     <Form.Group controlId={param.param} key={param.param}>
                       <Form.Label>{param.name}</Form.Label>
                       <param.component
-                        value={script.trigger.params[param.param]}
+                        value={formState.trigger.params[param.param]}
                         onChange={(value) =>
                           handleChangeTriggerParam(value, param.param)
                         }
@@ -310,7 +330,10 @@ function Script(props) {
                   ))}
                 </Modal.Body>
                 <Modal.Footer>
-                  <Button variant="secondary" onClick={hideModal}>
+                  <Button
+                    variant="secondary"
+                    onClick={() => setIsOptionsModalShown(false)}
+                  >
                     Close
                   </Button>
                 </Modal.Footer>
@@ -328,5 +351,3 @@ function Script(props) {
     </>
   );
 }
-
-export default Script;

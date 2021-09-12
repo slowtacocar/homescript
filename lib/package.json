@@ -1,0 +1,8 @@
+{
+  "name": "@homescript/lib",
+  "version": "0.1.0",
+  "type": "module",
+  "peerDependencies": {
+    "isomorphic-fetch": "^3.0.0"
+  }
+}

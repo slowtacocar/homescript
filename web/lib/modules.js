@@ -1,4 +1,4 @@
-import FormControl from "react-bootstrap/FormControl";
+import { FormControl } from "react-bootstrap";
 
 const modules = {
   lifx: {
@@ -20,13 +20,15 @@ const modules = {
             .
           </>
         ),
-        component: (props) => (
-          <FormControl
-            type="password"
-            {...props}
-            onChange={(event) => props.onChange(event.target.value)}
-          />
-        ),
+        component: function LIFXKey(props) {
+          return (
+            <FormControl
+              type="password"
+              {...props}
+              onChange={(event) => props.onChange(event.target.value)}
+            />
+          );
+        },
       },
     ],
   },
@@ -37,27 +39,31 @@ const modules = {
         param: "long",
         name: "Longitude",
         description: "The longitude of your location",
-        component: (props) => (
-          <FormControl
-            type="number"
-            step="any"
-            {...props}
-            onChange={(event) => props.onChange(Number(event.target.value))}
-          />
-        ),
+        component: function Longitude(props) {
+          return (
+            <FormControl
+              type="number"
+              step="any"
+              {...props}
+              onChange={(event) => props.onChange(Number(event.target.value))}
+            />
+          );
+        },
       },
       {
         param: "lat",
         name: "Latitude",
         description: "The latitude of your location",
-        component: (props) => (
-          <FormControl
-            type="number"
-            step="any"
-            {...props}
-            onChange={(event) => props.onChange(Number(event.target.value))}
-          />
-        ),
+        component: function Latitude(props) {
+          return (
+            <FormControl
+              type="number"
+              step="any"
+              {...props}
+              onChange={(event) => props.onChange(Number(event.target.value))}
+            />
+          );
+        },
       },
     ],
   },

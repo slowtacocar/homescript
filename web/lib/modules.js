@@ -21,13 +21,7 @@ const modules = {
           </>
         ),
         component: function LIFXKey(props) {
-          return (
-            <FormControl
-              type="password"
-              {...props}
-              onChange={(event) => props.onChange(event.target.value)}
-            />
-          );
+          return <FormControl type="password" {...props} />;
         },
       },
     ],
@@ -40,14 +34,7 @@ const modules = {
         name: "Longitude",
         description: "The longitude of your location",
         component: function Longitude(props) {
-          return (
-            <FormControl
-              type="number"
-              step="any"
-              {...props}
-              onChange={(event) => props.onChange(Number(event.target.value))}
-            />
-          );
+          return <FormControl type="number" step="any" {...props} />;
         },
       },
       {
@@ -55,14 +42,7 @@ const modules = {
         name: "Latitude",
         description: "The latitude of your location",
         component: function Latitude(props) {
-          return (
-            <FormControl
-              type="number"
-              step="any"
-              {...props}
-              onChange={(event) => props.onChange(Number(event.target.value))}
-            />
-          );
+          return <FormControl type="number" step="any" {...props} />;
         },
       },
     ],

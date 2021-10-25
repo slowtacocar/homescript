@@ -11,6 +11,7 @@
     "@homescript/lib": "workspace:lib",
     "ace-builds": "^1.4.12",
     "bootstrap": "^4.6.0",
+    "formik": "^2.2.9",
     "isomorphic-fetch": "^3.0.0",
     "lodash": "^4.17.21",
     "mongoose": "^6.0.3",

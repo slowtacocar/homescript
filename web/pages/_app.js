@@ -1,20 +1,21 @@
-import { Navbar, Button, Spinner } from "react-bootstrap";
-import { signOut, signIn } from "next-auth/client";
+import { Navbar, Button } from "react-bootstrap";
+import { signOut, signIn, useSession, Provider } from "next-auth/client";
 import "../styles/globals.scss";
 import { useEffect } from "react";
-import useSWR from "swr";
-import fetcher from "@homescript/lib/fetcher";
+import Loading from "../components/Loading";
 
 export default function App({ Component, pageProps }) {
-  const { data } = useSWR("/api/auth/session", fetcher);
+  const [session, loading] = useSession();
 
   useEffect(() => {
-    if (data && !data.user) {
+    if (!session && !loading) {
       signIn();
     }
-  }, [data]);
+  }, [session, loading]);
 
-  return data && data.user ? (
+  if (!session) return <Loading />;
+
+  return (
     <div className="dashboard-grid">
       <div className="dashboard-navbar">
         <Navbar bg="dark" variant="dark">
@@ -24,13 +25,9 @@ export default function App({ Component, pageProps }) {
           </Button>
         </Navbar>
       </div>
-      <Component {...pageProps} />
-    </div>
-  ) : (
-    <div className="text-center">
-      <Spinner animation="border" role="status">
-        <span className="sr-only">Loading...</span>
-      </Spinner>
+      <Provider session={session}>
+        <Component {...pageProps} />
+      </Provider>
     </div>
   );
 }

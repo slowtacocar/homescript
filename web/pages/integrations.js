@@ -1,79 +1,66 @@
-import { useEffect, useState } from "react";
-import { Spinner, Accordion, Card, Button, Form } from "react-bootstrap";
+import { Accordion, Card, Button, Form } from "react-bootstrap";
 import useSWR from "swr";
 import Sidebar from "../components/Sidebar";
-import fetcher from "@homescript/lib/fetcher";
 import modules from "../lib/modules";
+import Loading from "../components/Loading";
+import Error from "../components/Error";
+import { Formik } from "formik";
+import fetchAPI from "../lib/fetchAPI";
+import LoadingButton from "../components/LoadingButton";
+import FormGroup from "../components/FormGroup";
 
 export default function Integrations() {
-  const { data } = useSWR("/api/user/global", fetcher);
+  const { data, error } = useSWR("/api/user/global", fetchAPI);
 
-  const [formState, setFormState] = useState(null);
-
-  useEffect(() => {
-    setFormState(data);
-  }, [data]);
-
-  function handleChange(value, name, key) {
-    setFormState((oldFormState) => ({
-      ...oldFormState,
-      [key]: { ...oldFormState[key], [name]: value },
-    }));
+  async function handleSubmit(values) {
+    try {
+      await fetchAPI("/api/user/global", {
+        method: "PATCH",
+        body: values,
+      });
+    } catch {
+      alert("Failed to update integration");
+    }
   }
 
-  async function handleSubmit(event, value) {
-    event.preventDefault();
-    await fetcher("/api/user/global", {
-      method: "PATCH",
-      body: {
-        [value]: formState[value],
-      },
-    });
-  }
+  if (error) return <Error />;
+  if (!data) return <Loading />;
 
   return (
     <Sidebar>
-      {formState ? (
-        <Accordion>
-          {Object.entries(modules).map(([key, value]) => (
-            <Card key={key}>
-              <Card.Header>
-                <Accordion.Toggle as={Button} variant="link" eventKey={key}>
-                  {value.name}
-                </Accordion.Toggle>
-              </Card.Header>
-              <Accordion.Collapse eventKey={key}>
-                <Card.Body>
-                  <Form onSubmit={(event) => handleSubmit(event, key)}>
-                    {value.params.map((param) => (
-                      <Form.Group
-                        controlId={`${key}${param.param}`}
-                        key={param.param}
-                      >
-                        <Form.Label>{param.name}</Form.Label>
-                        <param.component
-                          value={formState[key][param.param]}
-                          onChange={(value) =>
-                            handleChange(value, param.param, key)
-                          }
+      <Formik initialValues={data} enableReinitialize onSubmit={handleSubmit}>
+        {({ handleSubmit, isSubmitting }) => (
+          <Form onSubmit={handleSubmit}>
+            <Accordion className="mb-3">
+              {Object.entries(modules).map(([key, value]) => (
+                <Card key={key}>
+                  <Card.Header>
+                    <Accordion.Toggle as={Button} variant="link" eventKey={key}>
+                      {value.name}
+                    </Accordion.Toggle>
+                  </Card.Header>
+                  <Accordion.Collapse eventKey={key}>
+                    <Card.Body>
+                      {value.params.map((param) => (
+                        <FormGroup
+                          key={param.param}
+                          as={param.component}
+                          label={param.name}
+                          text={param.description}
+                          name={`${key}.${param.param}`}
                         />
-                        <Form.Text>{param.description}</Form.Text>
-                      </Form.Group>
-                    ))}
-                    <Button type="submit">Save</Button>
-                  </Form>
-                </Card.Body>
-              </Accordion.Collapse>
-            </Card>
-          ))}
-        </Accordion>
-      ) : (
-        <div className="text-center">
-          <Spinner animation="border" role="status">
-            <span className="sr-only">Loading...</span>
-          </Spinner>
-        </div>
-      )}
+                      ))}
+                    </Card.Body>
+                  </Accordion.Collapse>
+                </Card>
+              ))}
+            </Accordion>
+            <LoadingButton block isLoading={isSubmitting} type="submit">
+              Save
+            </LoadingButton>
+          </Form>
+        )}
+      </Formik>
     </Sidebar>
   );
 }

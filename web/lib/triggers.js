@@ -1,6 +1,7 @@
 import ToggleButtonGroup from "react-bootstrap/ToggleButtonGroup";
 import ToggleButton from "react-bootstrap/ToggleButton";
 import FormControl from "react-bootstrap/FormControl";
+import { useFormikContext } from "formik";
 
 const triggers = {
   Schedule: {
@@ -16,8 +17,14 @@ const triggers = {
         name: "Days of the week",
         description: "Run this script on the following days of the week",
         component: function DayOfWeek(props) {
+          const { setFieldValue } = useFormikContext();
+
           return (
-            <ToggleButtonGroup type="checkbox" {...props}>
+            <ToggleButtonGroup
+              type="checkbox"
+              {...props}
+              onChange={(value) => setFieldValue(props.name, value)}
+            >
               <ToggleButton value={1}>Mon.</ToggleButton>
               <ToggleButton value={2}>Tue.</ToggleButton>
               <ToggleButton value={3}>Wed.</ToggleButton>
@@ -35,18 +42,7 @@ const triggers = {
         description:
           "The hour (24hr time) at which to run the script (leave blank to run once per hour)",
         component: function Hour(props) {
-          return (
-            <FormControl
-              type="number"
-              {...props}
-              onChange={(event) =>
-                props.onChange(
-                  event.target.value === "" ? null : Number(event.target.value)
-                )
-              }
-              value={props.value === null ? "" : props.value}
-            />
-          );
+          return <FormControl type="number" {...props} />;
         },
       },
       {
@@ -55,18 +51,7 @@ const triggers = {
         description:
           "The minute at which to run the script (leave blank to run once per minute)",
         component: function Minute(props) {
-          return (
-            <FormControl
-              type="number"
-              {...props}
-              onChange={(event) =>
-                props.onChange(
-                  event.target.value === "" ? null : Number(event.target.value)
-                )
-              }
-              value={props.value === null ? "" : props.value}
-            />
-          );
+          return <FormControl type="number" {...props} />;
         },
       },
       {
@@ -75,18 +60,7 @@ const triggers = {
         description:
           "The second at which to run the script (leave blank to run once per second)",
         component: function Second(props) {
-          return (
-            <FormControl
-              type="number"
-              {...props}
-              onChange={(event) =>
-                props.onChange(
-                  event.target.value === "" ? null : Number(event.target.value)
-                )
-              }
-              value={props.value === null ? "" : props.value}
-            />
-          );
+          return <FormControl type="number" {...props} />;
         },
       },
     ],

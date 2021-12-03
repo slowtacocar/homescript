@@ -20,19 +20,21 @@ const triggers = {
           const { setFieldValue } = useFormikContext();
 
           return (
-            <ToggleButtonGroup
-              type="checkbox"
-              {...props}
-              onChange={(value) => setFieldValue(props.name, value)}
-            >
-              <ToggleButton value={1}>Mon.</ToggleButton>
-              <ToggleButton value={2}>Tue.</ToggleButton>
-              <ToggleButton value={3}>Wed.</ToggleButton>
-              <ToggleButton value={4}>Thu.</ToggleButton>
-              <ToggleButton value={5}>Fri.</ToggleButton>
-              <ToggleButton value={6}>Sat.</ToggleButton>
-              <ToggleButton value={0}>Sun.</ToggleButton>
-            </ToggleButtonGroup>
+            <div>
+              <ToggleButtonGroup
+                type="checkbox"
+                {...props}
+                onChange={(value) => setFieldValue(props.name, value)}
+              >
+                <ToggleButton value={1}>Mon.</ToggleButton>
+                <ToggleButton value={2}>Tue.</ToggleButton>
+                <ToggleButton value={3}>Wed.</ToggleButton>
+                <ToggleButton value={4}>Thu.</ToggleButton>
+                <ToggleButton value={5}>Fri.</ToggleButton>
+                <ToggleButton value={6}>Sat.</ToggleButton>
+                <ToggleButton value={0}>Sun.</ToggleButton>
+              </ToggleButtonGroup>
+            </div>
           );
         },
       },

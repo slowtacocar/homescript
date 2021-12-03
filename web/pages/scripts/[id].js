@@ -94,7 +94,7 @@ export default function Script() {
                 >
                   <FormGroup name="name" label="Name" />
                   <FormGroup name="description" description="Description" />
-                  <Form.Group controlId="trigger">
+                  <Form.Group controlId="trigger" className="mb-3">
                     <Form.Label>Trigger</Form.Label>
                     <InputGroup>
                       <Field
@@ -110,22 +110,20 @@ export default function Script() {
                           })
                         }
                       />
-                      <InputGroup.Append>
-                        <Button
-                          variant="outline-secondary"
-                          onClick={() => setIsOptionsModalShown(true)}
-                          disabled={
-                            triggers[values.trigger.name].params.length <= 0
-                          }
-                        >
-                          Options...
-                        </Button>
-                      </InputGroup.Append>
+                      <Button
+                        variant="outline-secondary"
+                        onClick={() => setIsOptionsModalShown(true)}
+                        disabled={
+                          triggers[values.trigger.name].params.length <= 0
+                        }
+                      >
+                        Options...
+                      </Button>
                     </InputGroup>
                   </Form.Group>
                   <Form.Group
                     controlId="script"
-                    className="flex-grow-1 d-flex flex-column mh"
+                    className="flex-grow-1 d-flex flex-column mh mb-3"
                   >
                     <Form.Label>Script</Form.Label>
                     <div
@@ -137,13 +135,13 @@ export default function Script() {
                     <LoadingButton
                       isLoading={isSubmitting}
                       type="submit"
-                      className="mr-2"
+                      className="me-2"
                     >
                       Save
                     </LoadingButton>
                     <Button
                       variant="secondary"
-                      className="mr-2"
+                      className="me-2"
                       onClick={() => router.push("/")}
                     >
                       Close
@@ -151,7 +149,7 @@ export default function Script() {
                     <Button
                       variant="danger"
                       onClick={deleteScript}
-                      className="float-right"
+                      className="float-end"
                     >
                       Delete
                     </Button>

@@ -1,33 +1,26 @@
-import { Navbar, Button } from "react-bootstrap";
-import { signOut, signIn, useSession, Provider } from "next-auth/client";
+import { Navbar, Button, Container } from "react-bootstrap";
+import { signOut, SessionProvider } from "next-auth/react";
 import "../styles/globals.scss";
-import { useEffect } from "react";
-import Loading from "../components/Loading";
+import Auth from "../components/Auth";
 
 export default function App({ Component, pageProps }) {
-  const [session, loading] = useSession();
-
-  useEffect(() => {
-    if (!session && !loading) {
-      signIn();
-    }
-  }, [session, loading]);
-
-  if (!session) return <Loading />;
-
   return (
     <div className="dashboard-grid">
       <div className="dashboard-navbar">
         <Navbar bg="dark" variant="dark">
-          <Navbar.Brand className="mr-auto">Homescript</Navbar.Brand>
-          <Button variant="outline-light" onClick={() => signOut()}>
-            Sign Out
-          </Button>
+          <Container fluid>
+            <Navbar.Brand>Homescript</Navbar.Brand>
+            <Button variant="outline-light" onClick={() => signOut()}>
+              Sign Out
+            </Button>
+          </Container>
         </Navbar>
       </div>
-      <Provider session={session}>
-        <Component {...pageProps} />
-      </Provider>
+      <SessionProvider>
+        <Auth>
+          <Component {...pageProps} />
+        </Auth>
+      </SessionProvider>
     </div>
   );
 }

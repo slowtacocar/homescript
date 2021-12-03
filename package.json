@@ -4,5 +4,6 @@
     "web",
     "server",
     "lib"
-  ]
+  ],
+  "packageManager": "yarn@3.1.1"
 }

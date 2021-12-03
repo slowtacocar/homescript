@@ -29,19 +29,11 @@ export default function Devices() {
           ) : devices ? (
             <Accordion>
               {Object.entries(devices).map(([key, device]) => (
-                <Card key={key}>
-                  <Card.Header>
-                    <code>
-                      <Accordion.Toggle
-                        as={Button}
-                        variant="link"
-                        eventKey={key}
-                      >
-                        {key}
-                      </Accordion.Toggle>
-                    </code>
-                  </Card.Header>
-                  <Accordion.Collapse eventKey={key}>
+                <Accordion.Item key={key} eventKey={key}>
+                  <Accordion.Header>
+                    <code>{key}</code>
+                  </Accordion.Header>
+                  <Accordion.Body>
                     <ListGroup variant="flush">
                       {device.map((method) => (
                         <ListGroup.Item
@@ -53,8 +45,8 @@ export default function Devices() {
                         </ListGroup.Item>
                       ))}
                     </ListGroup>
-                  </Accordion.Collapse>
-                </Card>
+                  </Accordion.Body>
+                </Accordion.Item>
               ))}
             </Accordion>
           ) : (

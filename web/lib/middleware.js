@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { getSession } from "next-auth/client";
+import { getSession } from "next-auth/react";
 
 let cached = global.mongoose;
 

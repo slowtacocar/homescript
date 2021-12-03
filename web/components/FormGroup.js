@@ -3,7 +3,7 @@ import { Field, ErrorMessage } from "formik";
 
 export default function FormGroup({ label, children, text, mb0, ...props }) {
   return (
-    <Form.Group controlId={props.name} className={mb0 ? "mb-0" : ""}>
+    <Form.Group controlId={props.name} className={mb0 ? "" : "mb-3"}>
       <Form.Label>{label}</Form.Label>
       <Field as={Form.Control} {...props}>
         {children}

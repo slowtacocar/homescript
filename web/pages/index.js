@@ -43,7 +43,11 @@ export default function Scripts() {
     <Sidebar>
       <Row>
         <Col xs={4} className="mb-4">
-          <Button block variant="outline-secondary h-100" onClick={newScript}>
+          <Button
+            className="w-100 h-100"
+            variant="outline-secondary"
+            onClick={newScript}
+          >
             <p className="display-3">+</p>
             <p className="lead">New Script</p>
           </Button>

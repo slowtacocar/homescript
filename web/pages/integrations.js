@@ -33,29 +33,27 @@ export default function Integrations() {
           <Form onSubmit={handleSubmit}>
             <Accordion className="mb-3">
               {Object.entries(modules).map(([key, value]) => (
-                <Card key={key}>
-                  <Card.Header>
-                    <Accordion.Toggle as={Button} variant="link" eventKey={key}>
-                      {value.name}
-                    </Accordion.Toggle>
-                  </Card.Header>
-                  <Accordion.Collapse eventKey={key}>
-                    <Card.Body>
-                      {value.params.map((param) => (
-                        <FormGroup
-                          key={param.param}
-                          as={param.component}
-                          label={param.name}
-                          text={param.description}
-                          name={`${key}.${param.param}`}
-                        />
-                      ))}
-                    </Card.Body>
-                  </Accordion.Collapse>
-                </Card>
+                <Accordion.Item key={key} eventKey={key}>
+                  <Accordion.Header>{value.name}</Accordion.Header>
+                  <Accordion.Body>
+                    {value.params.map((param) => (
+                      <FormGroup
+                        key={param.param}
+                        as={param.component}
+                        label={param.name}
+                        text={param.description}
+                        name={`${key}.${param.param}`}
+                      />
+                    ))}
+                  </Accordion.Body>
+                </Accordion.Item>
               ))}
             </Accordion>
-            <LoadingButton block isLoading={isSubmitting} type="submit">
+            <LoadingButton
+              className="w-100"
+              isLoading={isSubmitting}
+              type="submit"
+            >
               Save
             </LoadingButton>
           </Form>
